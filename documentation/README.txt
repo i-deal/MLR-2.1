@@ -1,3 +1,13 @@
+Requirements to install:
+
+conda install
+
+conda create --name yourname37 python=3.7
+conda activate yourname37
+conda install pytorch torchvision cudatoolkit=10.0 -c pytorch
+pip install scikit-learn
+conda install matplotlib
+conda install tqdm imageio ipython opencv pandas
 
 To train a new model:
  - Open Training.py, on line 15, set the 'data_set_flag' variable to one of the following data sets.
