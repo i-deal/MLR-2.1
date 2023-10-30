@@ -35,13 +35,12 @@ from PIL import Image, ImageOps, ImageEnhance, __version__ as PILLOW_VERSION
 from joblib import dump, load
 import copy
 
-if torch.cuda.is_available():
-    device = 'cuda'
-else:
-    device = 'cpu'
-
 # load a saved vae checkpoint
 def load_checkpoint(filepath):
+    if torch.cuda.is_available():
+        device = 'cuda'
+    else:
+        device = 'cpu'
     checkpoint = torch.load(filepath,device)
     vae.load_state_dict(checkpoint['state_dict'])
     return vae
