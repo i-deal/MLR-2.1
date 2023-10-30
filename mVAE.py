@@ -171,11 +171,16 @@ def thecolorlabels(datatype):
     labelscolor = colorlabels[coloridx]
     return torch.tensor(labelscolor)
 
+# model training data set and dimensions
 data_set_flag = 'padded_mnist_rg' # mnist, cifar10, padded_mnist, padded_cifar10
-
 imgsize = 28
-retina_size = 100 #by default should be same size as image
+retina_size = 100 # by default should be same size as image
 vae_type_flag = 'CNN' # must be CNN or FC
+x_dim = retina_size * imgsize * 3
+h_dim1 = 256
+h_dim2 = 128
+z_dim = 8
+l_dim = 100
 
 # must call the dataset_builder function from a seperate .py file
 
@@ -837,7 +842,7 @@ class VAE_CNN(nn.Module):
         return output, mu_color, log_var_color, mu_shape, log_var_shape, mu_location, log_var_location
 
 # build model
-def vae_builder(vae_type = vae_type_flag, x_dim = retina_size * imgsize * 3, h_dim1 = 256, h_dim2 = 128, z_dim = 8, l_dim = 100):
+def vae_builder(vae_type = vae_type_flag, x_dim = x_dim, h_dim1 = h_dim1, h_dim2 = h_dim2, z_dim = z_dim, l_dim = l_dim):
     if vae_type_flag == 'FC':
         vae = VAE_FC(x_dim, h_dim1, h_dim2, z_dim)
     else:
