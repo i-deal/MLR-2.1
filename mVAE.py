@@ -1,17 +1,16 @@
-
 # MNIST VAE from http://github.com/lyeoni/pytorch-mnist-VAE/blob/master/pytorch-mnist-VAE.ipynb 
 # Modified by Brad Wyble and Shekoo Hedayati
 # Modifications:
 # Colorize transform that changes the colors of a grayscale image
 # colors are chosen from 10 options:
-colornames = ["red", "blue", "green", "purple", "yellow", "cyan", "orange", "brown", "pink", "white-ish"]
+colornames = ["red", "blue", "green", "purple", "yellow", "cyan", "orange", "brown", "pink", "white"]
 # specified in "colorvals" variable below
 
 # also there is a skip connection from the first layer to the last layer to enable reconstructions of new stimuli
 # and the VAE bottleneck is split, having two different maps
 # one is trained with a loss function for color only (eliminating all shape info, reserving only the brightest color)
 # the other is trained with a loss function for shape only
-#
+
 
 # prerequisites
 import torch
@@ -31,12 +30,21 @@ from tqdm import tqdm
 import imageio
 import os
 from torch.utils.data import DataLoader, Subset
-#from config import numcolors, args
-#from dataloader import notMNIST
 
 from PIL import Image, ImageOps, ImageEnhance, __version__ as PILLOW_VERSION
 from joblib import dump, load
 import copy
+
+if torch.cuda.is_available():
+    device = 'cuda'
+else:
+    device = 'cpu'
+
+# load a saved vae checkpoint
+def load_checkpoint(filepath):
+    checkpoint = torch.load(filepath,device)
+    vae.load_state_dict(checkpoint['state_dict'])
+    return vae
 
 global colorlabels
 numcolors = 0
@@ -103,9 +111,6 @@ def Colorize_func_secret(img,npflag = 0):
     backup = np_img
     np_img = np_img.astype(np.uint8)
     np_img[0,0,0] = thiscolor   #secretely embed the color label inside
-        #this is a temporary fix
-    #print(np_img[0,0,0])
-    #print(numcolors)
     img = Image.fromarray(np_img, 'RGB')
     if npflag ==1:
         img = backup
@@ -988,23 +993,20 @@ def progress_out(data, epoch, count, skip = False, filename = None):
             nrow=sample_size, normalize=False, range=(-1, 1),)
 
 def train(epoch, whichdecode, train_loader_noSkip, train_loader_skip, test_loader):
-    global numcolors
-    colorlabels = np.random.randint(0, 10,1000000)  # regenerate the list of color labels at the start of each test epoch
-    numcolors = 0
     vae.train()
     train_loss = 0
     dataiter_noSkip = iter(train_loader_noSkip) #the latent space is trained on MNIST and f-MNIST
     m = 6 # number of seperate training decoders used
     dataiter_skip= iter(train_loader_skip) #The skip connection is trained on notMNIST
     test_iter = iter(test_loader)
-    count=0
+    count = 0
     loader=tqdm(train_loader_noSkip)
     for i in loader:
         if (whichdecode == 'iterated'):
            data_noSkip = dataiter_noSkip.next()
            data_skip = dataiter_skip.next()
            data = data_noSkip[0]
-           # add twocolor training for skip
+
            count += 1
            detachgrad = 'none'
            optimizer.zero_grad()
