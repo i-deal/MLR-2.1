@@ -16,51 +16,24 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import torch.optim as optim
-import config 
 
-config.init()
+from mVAE import train, test, vae,  thecolorlabels, optimizer, dataset_builder, load_checkpoint
 
-from config import numcolors, args
-global numcolors
-from mVAE import train, test, vae,  thecolorlabels, optimizer, dataset_builder
-
-if torch.cuda.is_available():
-    device = 'cuda'
-    print('CUDA')
-else:
-    device = 'cpu'
-
-# reload a saved file
-def load_checkpoint(filepath):
-    checkpoint = torch.load(filepath,device)
-    vae.load_state_dict(checkpoint['state_dict'])
-    return vae
-
-#load_checkpoint('output/checkpoint_threeloss_singlegrad100_smfc.pth') #temp
-#define color labels 
-#this list of colors is randomly generated at the start of each epoch (down below)
-
-#numcolors indicates where we are in the color sequence 
-#this index value is reset back to 0 at the start of each epoch (down below)
-numcolors = 0
-#this is the amount of variability in r,g,b color values (+/- this amount from the baseline)
-
-#these define the R,G,B color values for each of the 10 colors.  
-#Values near the boundaries of 0 and 1 are specified with colorrange to avoid the clipping the random values
-checkpoint_folder_path = f'output'
+checkpoint_folder_path = f'output' # the output folder for the trained model versions
 
 if not os.path.exists(checkpoint_folder_path):
     os.mkdir(checkpoint_folder_path)
+
+# to resume training an existing model checkpoint, uncomment the following line with the checkpoints filename
+# load_checkpoint('CHECKPOINTNAME.pth')
 
 bs=100
 data_set_flag ='padded_mnist'
 train_loader_noSkip, train_loader_skip, test_loader_noSkip, test_loader_skip = dataset_builder(data_set_flag, bs)
 
 for epoch in range(1, 201):
-    #modified to include color labels
     train(epoch,'iterated', train_loader_noSkip, train_loader_skip, test_loader_noSkip)
-    colorlabels = np.random.randint(0,10,100000)#regenerate the list of color labels at the start of each test epoch
-    numcolors = 0
+ 
     if epoch % 5 == 0:
         test('all',test_loader_noSkip, test_loader_skip, bs)  
    

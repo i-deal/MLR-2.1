@@ -71,15 +71,9 @@ clf_shapeS=load('output{num}/ss{num}.joblib'.format(num=modelNumber))
 clf_shapeC=load('output{num}/sc{num}.joblib'.format(num=modelNumber))
 clf_colorC=load('output{num}/cc{num}.joblib'.format(num=modelNumber))
 clf_colorS=load('output{num}/cs{num}.joblib'.format(num=modelNumber))
+
 #write to a text file
-
 outputFile = open('outputFile.txt'.format(modelNumber),'w')
-
-# .pth
-
-
-### Parameters
-
 
 bs_testing = 1000     # number of images for testing. 20000 is the limit
 shape_coeff = 1       #cofficient of the shape map
